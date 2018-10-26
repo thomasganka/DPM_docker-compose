@@ -1,0 +1,211 @@
+---
+# sch_install.yml
+
+- hosts: localhost
+  user: root
+  vars:
+    db_user: sch
+    jdk_url: http://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-linux-x64.rpm
+    mysql_driver_url: https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.45.tar.gz
+    mysql_dbs:
+      - jobrunner
+      - messaging
+      - notification
+      - pipelinestore
+      - policy
+      - provisioning
+      - reporting
+      - scheduler
+      - sdp_classification
+      - security
+      - sla
+      - timeseries
+      - topology
+
+  tasks:
+    
+    - name: download Oracle JDK
+      get_url:
+        url: "{{ jdk_url }}"
+        headers: 'Cookie:oraclelicense=accept-securebackup-cookie'
+        dest: "/tmp/jdk.rpm"
+
+    - name: install Oracle JDK
+      yum:
+        name: /tmp/jdk.rpm
+        state: present
+
+    - name: install DPM
+      yum:
+        name: "streamsets-dpm-3.5.0-1.x86_64.rpm"
+        state: present
+
+    - name: download and unzip mysql-connector-java
+      unarchive:
+        src: "{{ mysql_driver_url }}"
+        dest: /tmp/
+        remote_src: yes
+
+    - name: copy mysql-connector-java to /opt/streamsets-dpm/extra-lib/
+      copy:
+        src: /tmp/mysql-connector-java-5.1.45/mysql-connector-java-5.1.45-bin.jar
+        dest: /opt/streamsets-dpm/extra-lib/
+        remote_src: yes
+
+    - name: add JDBC URL's for the MySQL databases
+      lineinfile:
+        path: "/etc/dpm/{{ item }}-app.properties"
+        state: present
+        regexp: "^db.openjpa.ConnectionURL="
+        line: "db.openjpa.ConnectionURL=jdbc:mysql://mysql:3306/{{ item }}?useSSL=false"
+      with_items:
+        - "{{ mysql_dbs }}"
+
+    - name: add JDBC username for the MySQL databases
+      lineinfile:
+        path: "/etc/dpm/{{ item }}-app.properties"
+        state: present
+        regexp: "^db.openjpa.ConnectionUserName="
+        line: "db.openjpa.ConnectionUserName=root"
+      with_items:
+        - "{{ mysql_dbs }}"
+
+    - name: add JDBC password for the MySQL databases
+      lineinfile:
+        path: "/etc/dpm/{{ item }}-app.properties"
+        state: present
+        regexp: "^db.openjpa.ConnectionPassword="
+        line: "db.openjpa.ConnectionPassword=local"
+      with_items:
+        - "{{ mysql_dbs }}"
+
+    - name: set dpm.base.instance.url in common-to-all-apps.properties
+      lineinfile:
+        path: "/etc/dpm/common-to-all-apps.properties"
+        state: present
+        insertafter: '#dpm.base.instance.url='
+        line: "dpm.base.instance.url=http://localhost:18631"
+
+    - name: set dpm.base.url in common-to-all-apps.properties
+      lineinfile:
+        path: "/etc/dpm/common-to-all-apps.properties"
+        state: present
+        regexp: "^dpm.base.url="
+        line: "dpm.base.url=http://localhost:18631"
+
+    - name: comment out http.load.balancer line in /etc/dpm/common-to-all-apps.properties
+      replace:
+        dest: /etc/dpm/common-to-all-apps.properties
+        regexp: "^http.load.balancer.url="
+        replace: "#http.load.balancer.url="
+
+    - name: set mail.smtp.host in common-to-all-apps.properties
+      lineinfile:
+        path: "/etc/dpm/common-to-all-apps.properties"
+        state: present
+        regexp: "^mail.smtp.host="
+        line: "mail.smtp.host=smtp"
+
+    - name: set mail.smtp.port in common-to-all-apps.properties
+      lineinfile:
+        path: "/etc/dpm/common-to-all-apps.properties"
+        state: present
+        regexp: "^mail.smtp.port="
+        line: "mail.smtp.port=25"
+
+    - name: set pipeline.designer.system.sdc.url in common-to-all-apps.properties
+      lineinfile:
+        path: "/etc/dpm/common-to-all-apps.properties"
+        state: present
+        regexp: "^pipeline.designer.system.sdc.url="
+        line: "pipeline.designer.system.sdc.url=http://sdc:18630"
+
+    - name: set db.url in timeseries-app.properties
+      lineinfile:
+        path: "/etc/dpm/timeseries-app.properties"
+        state: present
+        regexp: "^db.url="
+        line: "db.url=http://influxdb:8086"
+
+    - name: set dpm.app.db.url in timeseries-app.properties
+      lineinfile:
+        path: "/etc/dpm/timeseries-app.properties"
+        state: present
+        regexp: "^dpm.app.db.url="
+        line: "dpm.app.db.url=http://influxdb:8086"
+
+    - name: set db.name in timeseries-app.properties
+      lineinfile:
+        path: "/etc/dpm/timeseries-app.properties"
+        state: present
+        regexp: "^db.name="
+        line: "db.name=sch"
+
+    - name: set dpm.app.db.name in timeseries-app.properties
+      lineinfile:
+        path: "/etc/dpm/timeseries-app.properties"
+        state: present
+        regexp: "^dpm.app.db.name="
+        line: "dpm.app.db.name=sch_app"
+
+    - name: set db.user in timeseries-app.properties
+      lineinfile:
+        path: "/etc/dpm/timeseries-app.properties"
+        state: present
+        regexp: "^db.user="
+        line: "db.user=root"
+
+    - name: set dpm.app.db.user in timeseries-app.properties
+      lineinfile:
+        path: "/etc/dpm/timeseries-app.properties"
+        state: present
+        regexp: "^dpm.app.db.user="
+        line: "dpm.app.db.user=root"
+
+    - name: set db.password in timeseries-app.properties
+      lineinfile:
+        path: "/etc/dpm/timeseries-app.properties"
+        state: present
+        regexp: "^db.password="
+        line: "db.password=influxdb"
+
+    - name: set dpm.app.db.password in timeseries-app.properties
+      lineinfile:
+        path: "/etc/dpm/timeseries-app.properties"
+        state: present
+        regexp: "^dpm.app.db.password="
+        line: "dpm.app.db.password=influxdb"
+
+    - name: set db.password in scheduler-app.properties
+      lineinfile:
+        path: "/etc/dpm/scheduler-app.properties"
+        state: present
+        regexp: "^db.password="
+        line: "db.password=influxdb"
+
+    - name: set dpm.app.db.password in scheduler-app.properties
+      lineinfile:
+        path: "/etc/dpm/scheduler-app.properties"
+        state: present
+        regexp: "^dpm.app.db.password="
+        line: "dpm.app.db.password=influxdb"
+
+    - name: set db.password in reporting-app.properties
+      lineinfile:
+        path: "/etc/dpm/reporting-app.properties"
+        state: present
+        regexp: "^db.password="
+        line: "db.password=influxdb"
+
+    - name: set dpm.app.db.password in reporting-app.properties
+      lineinfile:
+        path: "/etc/dpm/reporting-app.properties"
+        state: present
+        regexp: "^dpm.app.db.password="
+        line: "dpm.app.db.password=influxdb"
+
+    - name: symlink /opt/streamsets-dpm/etc/ to /etc/dpm/
+      file: dest=/opt/streamsets-dpm/etc
+            src=/etc/dpm
+            state=link
+            force=yes

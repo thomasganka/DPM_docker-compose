@@ -1,0 +1,7 @@
+CREATE DATABASE sch
+CREATE DATABASE sch_app
+
+CREATE USER admin WITH PASSWORD admin
+grant ALL on sch to admin
+grant ALL on sch_app to admin
+grant read on _internal to admin
