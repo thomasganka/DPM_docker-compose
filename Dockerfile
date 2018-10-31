@@ -1,37 +1,36 @@
 FROM centos:7
 
-# setup ansible
-RUN yum update -y
-RUN yum group install "Development Tools" -y
-RUN yum install -y git
-RUN yum install -y python-jinja2 python-paramiko PyYAML make MySQL-python
-RUN yum install -y epel-release
-RUN yum install -y python-setuptools python-pip
-RUN pip install --upgrade pip
-RUN yum install -y gcc
-RUN yum install -y libffi-devel openssl-devel
-RUN yum install python34-devel -y
-RUN yum install python27-devel python27-setuptools python34-setuptools -y
-RUN git clone https://github.com/ansible/ansible.git && \
-    cd ansible && \
-    git checkout -b stable-2.4 origin/stable-2.4 && \
-    git submodule update --init --recursive && \
-    make install
-RUN mkdir /etc/ansible/ && \
-    echo "[localhost]" > /etc/ansible/hosts && \
-    echo "localhost ansible_connection=local" >> /etc/ansible/hosts && \
-    echo "export ANSIBLE_INVENTORY=~/ansible_hosts" >> /etc/profile
-RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py" && python2.7 get-pip.py
-RUN pip install ansible-lint 
+ARG ORACLE_JDK_URL
+ARG DPM_RMP
+ARG MYSQL_CONNECTOR_URL
 
 # Copy files
-COPY streamsets-dpm-3.5.0-1.x86_64.rpm .
-COPY sch_install.yml .
-COPY docker-entrypoint.sh .
-# # COPY run.sh .
-RUN chmod +x docker-entrypoint.sh
+COPY ${DPM_RMP} /tmp/streamsets-dpm.rpm
 
-# # start the install
-RUN ansible-playbook ./sch_install.yml
+# Download & install jdk
+RUN curl -o /tmp/jdk.rpm -b "oraclelicense=accept-securebackup-cookie" -L -C - -O ${ORACLE_JDK_URL}
+RUN yum localinstall -y /tmp/jdk.rpm && rm /tmp/jdk.rpm
+
+# Install DPM
+RUN yum localinstall -y /tmp/streamsets-dpm.rpm && rm /tmp/streamsets-dpm.rpm
+ENV DPM_HOME=/opt/streamsets-dpm
+ENV DPM_CONF=/etc/dpm
+ENV DPM_URL=localhost
+
+
+# # download and unzip mysql-connector-java
+RUN curl -SL ${MYSQL_CONNECTOR_URL} \
+    | tar -xz -C /tmp \
+    && mv /tmp/mysql*/*.jar ${DPM_HOME}/extra-lib/ \
+    && rm -rf /tmp/mysql*
+
+
+COPY *.sh ./
+RUN chmod +x docker-entrypoint.sh
+RUN chmod +x setup.sh
+
+RUN ./setup.sh
+
+# start the install
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["dpm"]

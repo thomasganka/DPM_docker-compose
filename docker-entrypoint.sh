@@ -1,19 +1,33 @@
 #!/bin/bash
+echo "Waiting for the database to start"
+sleep 10
 
-export DPM_DIST=/opt/streamsets-dpm
-
+cd ${DPM_HOME}
 if [ ! -e "./READY" ]; then
     
     declare -a arr=("jobrunner" "messaging" "notification" "pipelinestore" "policy" "provisioning" "reporting" "scheduler" "sdp_classification" "security" "sla" "timeseries" "topology")
 
+
+    echo "Create db Schemas"
+
     for i in "${arr[@]}"
     do
-        /opt/streamsets-dpm/bin/streamsets dpmcli $i buildSchema
+       bin/streamsets dpmcli $i buildSchema
     done
 
-    /opt/streamsets-dpm/dev/02-initsecurity.sh
+    echo "Init security"
+
+    dev/02-initsecurity.sh
+
+    echo "Generate System Id"
+
+    bin/streamsets dpmcli security systemId -c
 
     touch READY
+else
+    bin/streamsets dpmcli security systemId
 fi 
 
-exec "${DPM_DIST}/bin/streamsets" "$@"
+echo "Start DPM"
+
+exec "${DPM_HOME}/bin/streamsets" "$@"

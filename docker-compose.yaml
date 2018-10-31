@@ -7,6 +7,7 @@ volumes:
 services:
   mysql:
     image: mysql:5.7
+    restart: always
     volumes:
       - ./MySQL:/docker-entrypoint-initdb.d
     ports:
@@ -41,6 +42,7 @@ services:
   
   sdc:
     image: 'streamsets/datacollector:latest'
+    restart: always
     expose:
       - "18630"
 
@@ -48,6 +50,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        ORACLE_JDK_URL: ${ORACLE_JDK_URL}
+        DPM_RMP: ${DPM_RMP}
+        MYSQL_CONNECTOR_URL: ${MYSQL_CONNECTOR_URL}
     depends_on:
       - mysql
       - influxdb
