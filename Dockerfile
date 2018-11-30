@@ -3,6 +3,7 @@ FROM centos:7
 ARG ORACLE_JDK_URL
 ARG DPM_RMP
 ARG MYSQL_CONNECTOR_URL
+ENV DPM_VERSION=3.5.0
 
 # Copy files
 COPY ${DPM_RMP} /tmp/streamsets-dpm.rpm
@@ -10,6 +11,7 @@ COPY ${DPM_RMP} /tmp/streamsets-dpm.rpm
 # Download & install jdk
 RUN curl -o /tmp/jdk.rpm -b "oraclelicense=accept-securebackup-cookie" -L -C - -O ${ORACLE_JDK_URL}
 RUN yum localinstall -y /tmp/jdk.rpm && rm /tmp/jdk.rpm
+RUN yum install -y mysql
 
 # Install DPM
 RUN yum localinstall -y /tmp/streamsets-dpm.rpm && rm /tmp/streamsets-dpm.rpm

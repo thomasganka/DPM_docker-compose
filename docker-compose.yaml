@@ -10,6 +10,7 @@ services:
     restart: always
     volumes:
       - ./MySQL:/docker-entrypoint-initdb.d
+      - ${volume}/mysql:/var/lib/mysql
     ports:
       - '3306:3306'
     expose:
@@ -28,6 +29,7 @@ services:
       - 8086
     volumes:
       - ./influxdb:/docker-entrypoint-initdb.d
+      - ${volume}/influxdb:/var/lib/influxdb
     environment:
       INFLUXDB_ADMIN_ENABLED: "true"
 
@@ -40,11 +42,23 @@ services:
     ports:
       - "25:25"
   
-  sdc:
+  sdc1:
     image: 'streamsets/datacollector:latest'
     restart: always
+    volumes:
+      - '${volume}/sdc1:/data'
     expose:
       - "18630"
+  
+  sdc2:
+    image: 'streamsets/datacollector:latest'
+    restart: always
+    volumes:
+      - '${volume}/sdc2:/data'
+    expose:
+      - "18630"
+    ports:
+      - "18630:18630"
 
   sch:
     build:
@@ -58,11 +72,15 @@ services:
       - mysql
       - influxdb
       - smtp
-      - sdc
+      - sdc1
+      - sdc2
     links:
       - mysql
       - influxdb
       - smtp
-      - sdc
+      - sdc1
+      - sdc2
     ports:
       - '18631:18631'
+    volumes:
+      - '${volume}/sch:/data'

@@ -1,9 +1,14 @@
 #!/bin/bash
 echo "Waiting for the database to start"
-sleep 10
+
+until mysql -h mysql -u admin -p'admin'  -e ";" ; do
+    echo ".";
+    sleep 1;
+done
+
 
 cd ${DPM_HOME}
-if [ ! -e "./READY" ]; then
+if [ ! -e "/data/READY" ]; then
     
     declare -a arr=("jobrunner" "messaging" "notification" "pipelinestore" "policy" "provisioning" "reporting" "scheduler" "sdp_classification" "security" "sla" "timeseries" "topology")
 
@@ -23,10 +28,13 @@ if [ ! -e "./READY" ]; then
 
     bin/streamsets dpmcli security systemId -c
 
-    touch READY
-else
-    bin/streamsets dpmcli security systemId
+    echo $DPM_VERSION > /data/READY
+elif [ "$DPM_VERSION" != "$(cat /data/READY)" ] ;then
+    echo "Update db Schemas"
+    dev/01-updatedb.sh
 fi 
+
+bin/streamsets dpmcli security systemId
 
 echo "Start DPM"
 

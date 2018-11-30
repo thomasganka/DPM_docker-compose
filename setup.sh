@@ -26,7 +26,7 @@ sed -i 's/^mail.smtp.host=/mail.smtp.host=smtp/' ${DPM_CONF}/common-to-all-apps.
 sed -i 's/^mail.smtp.port=/mail.smtp.port=25/' ${DPM_CONF}/common-to-all-apps.properties
 
 # set pipeline.designer.system.sdc.url in common-to-all-apps.properties
-sed -i 's/^pipeline.designer.system.sdc.url=.*/pipeline.designer.system.sdc.url=http\:\/\/sdc\:18630/' ${DPM_CONF}/common-to-all-apps.properties
+sed -i 's/^pipeline.designer.system.sdc.url=.*/pipeline.designer.system.sdc.url=http\:\/\/sdc1\:18630/' ${DPM_CONF}/common-to-all-apps.properties
 
 # set db.url in timeseries-app.properties
 sed -i 's/^db.url=/db.url=http\:\/\/influxdb\:8086/' ${DPM_CONF}/timeseries-app.properties
