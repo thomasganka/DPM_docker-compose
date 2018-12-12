@@ -1,14 +1,15 @@
 #!/bin/bash
 echo "Waiting for the database to start"
+sleep 10;
 
-until mysql -h mysql -u admin -p'admin'  -e ";" ; do
-    echo ".";
-    sleep 1;
-done
+# until mysql -h mysql -u admin -p'admin'  -e ";" ; do
+#     echo ".";
+#     sleep 1;
+# done
 
 
-cd ${DPM_HOME}
-if [ ! -e "/data/READY" ]; then
+cd ${DPM_DIST}
+if [ ! -e "$DPM_CONF/READY" ]; then
     
     declare -a arr=("jobrunner" "messaging" "notification" "pipelinestore" "policy" "provisioning" "reporting" "scheduler" "sdp_classification" "security" "sla" "timeseries" "topology")
 
@@ -28,8 +29,8 @@ if [ ! -e "/data/READY" ]; then
 
     bin/streamsets dpmcli security systemId -c
 
-    echo $DPM_VERSION > /data/READY
-elif [ "$DPM_VERSION" != "$(cat /data/READY)" ] ;then
+    echo $DPM_VERSION > $DPM_CONF/READY
+elif [ "$DPM_VERSION" != "$(cat $DPM_CONF/READY)" ] ;then
     echo "Update db Schemas"
     dev/01-updatedb.sh
 fi 
@@ -38,4 +39,4 @@ bin/streamsets dpmcli security systemId
 
 echo "Start DPM"
 
-exec "${DPM_HOME}/bin/streamsets" "$@"
+exec "${DPM_DIST}/bin/streamsets" "$@"

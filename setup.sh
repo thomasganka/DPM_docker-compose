@@ -20,10 +20,14 @@ sed -i "s/^dpm.base.url=/dpm.base.url=http\:\/\/${DPM_URL}\:18631/" ${DPM_CONF}/
 sed -i 's/^http.load.balancer.url=/#http.load.balancer.url=/' ${DPM_CONF}/common-to-all-apps.properties
 
 # set mail.smtp.host in common-to-all-apps.properties
-sed -i 's/^mail.smtp.host=/mail.smtp.host=smtp/' ${DPM_CONF}/common-to-all-apps.properties
+sed -i 's/^mail.smtp.host=/mail.smtp.host=tmail/' ${DPM_CONF}/common-to-all-apps.properties
 
 # set mail.smtp.port in common-to-all-apps.properties
 sed -i 's/^mail.smtp.port=/mail.smtp.port=25/' ${DPM_CONF}/common-to-all-apps.properties
+sed -i 's/^mail.smtp.auth=/mail.smtp.auth=true/' ${DPM_CONF}/common-to-all-apps.properties
+sed -i 's/^xmail.username=/xmail.username=user@domain.org/' ${DPM_CONF}/common-to-all-apps.properties
+sed -i 's/^xmail.password=/xmail.password=pass/' ${DPM_CONF}/common-to-all-apps.properties
+sed -i 's/^xmail.from.address=/xmail.from.address=user@domain.org/' ${DPM_CONF}/common-to-all-apps.properties
 
 # set pipeline.designer.system.sdc.url in common-to-all-apps.properties
 sed -i 's/^pipeline.designer.system.sdc.url=.*/pipeline.designer.system.sdc.url=http\:\/\/sdc1\:18630/' ${DPM_CONF}/common-to-all-apps.properties

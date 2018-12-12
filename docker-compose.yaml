@@ -10,7 +10,7 @@ services:
     restart: always
     volumes:
       - ./MySQL:/docker-entrypoint-initdb.d
-      - ${volume}/mysql:/var/lib/mysql
+      - 'mysqldb:/var/lib/mysql'
     ports:
       - '3306:3306'
     expose:
@@ -29,24 +29,30 @@ services:
       - 8086
     volumes:
       - ./influxdb:/docker-entrypoint-initdb.d
-      - ${volume}/influxdb:/var/lib/influxdb
+      - 'influxdb:/var/lib/influxdb'
     environment:
       INFLUXDB_ADMIN_ENABLED: "true"
 
-  smtp:
-    image: namshi/smtp
-    container_name: smtp_relay
-    restart: always
-    expose: 
-      - 25
+  tmail:
+    image: vimagick/tmail
     ports:
       - "25:25"
+      - "110:110"
+    volumes:
+      - mail:/var/mail
+    environment:
+      - MAIL_NAME=domain.org
+      - MAIL_PATH=/var/mail
+      - MAIL_USER=user
+      - MAIL_PASS=pass
+    restart: always
   
+  # Internal SDC
   sdc1:
     image: 'streamsets/datacollector:latest'
     restart: always
     volumes:
-      - '${volume}/sdc1:/data'
+      - 'dc1:/data'
     expose:
       - "18630"
   
@@ -54,7 +60,7 @@ services:
     image: 'streamsets/datacollector:latest'
     restart: always
     volumes:
-      - '${volume}/sdc2:/data'
+      - 'dc2:/data'
     expose:
       - "18630"
     ports:
@@ -64,23 +70,29 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        ORACLE_JDK_URL: ${ORACLE_JDK_URL}
-        DPM_RMP: ${DPM_RMP}
-        MYSQL_CONNECTOR_URL: ${MYSQL_CONNECTOR_URL}
     depends_on:
       - mysql
       - influxdb
-      - smtp
+      - tmail
       - sdc1
       - sdc2
     links:
       - mysql
       - influxdb
-      - smtp
+      - tmail
       - sdc1
       - sdc2
     ports:
       - '18631:18631'
+      - '18632:18632'
     volumes:
-      - '${volume}/sch:/data'
+      - 'ch:/data'
+      - 'ch:/etc/dpm'
+
+volumes:
+  mysqldb:
+  influxdb:
+  dc1:
+  dc2:
+  ch:
+  mail:
