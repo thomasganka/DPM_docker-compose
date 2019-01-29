@@ -1,7 +1,9 @@
 Control Hub on Docker
 =====================
 
-Current version 3.7.1
+Current version:
+* Data Collector 3.7.1
+* Control Hub 3.8.0
 
 ## Prerequisits
 
@@ -16,17 +18,30 @@ cd DPM_docker-compose
 docker-compose build && docker-compose up -d
 ```
 
+Create a gmail application password here https://myaccount.google.com/apppasswords and save it
+
+
+Create a `.env` file at the root of the directory and add the following lines
+
+```
+MAIL_ADD=<user>@streamsets.com
+MAIL_PWD=<application password>
+DPM_URL=dpm.cluster:18631
+```
+
+Start the cluster
+
+```
+sudo ./start.sh
+```
+
 When the setup is complet thos different ports are available: 
 * Control Hub: [localhost:18631](localhost:18631)
-* Data Colector: [localhost:18630](localhost:18630)
-* Mysql: [localhost:3306](localhost:3306) 
-* Influx: [localhost:8086](localhost:8086), [localhost:8083](localhost:8083) 
+* Data Collector: [localhost:18630](localhost:18630)
+* Edge: [localhost:18633](localhost:18633)
 
 To stop everithing run `docker-compose down`
 
 If you need to restart from scratch, make sure to run `docker volume prune` to reset any volume.
 
-## WARNING
-
-SMTP server is currently not working so please edit `setup.sh` smtp sections with your own smtp server
-
+You can add user libraries directly in the local sdcUserLibraries and restart the data collectors

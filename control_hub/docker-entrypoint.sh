@@ -1,11 +1,7 @@
 #!/bin/bash
 echo "Waiting for the database to start"
-sleep 10;
+sleep 30;
 
-# until mysql -h mysql -u admin -p'admin'  -e ";" ; do
-#     echo ".";
-#     sleep 1;
-# done
 
 
 cd ${DPM_DIST}

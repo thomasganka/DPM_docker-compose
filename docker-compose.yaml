@@ -1,9 +1,5 @@
 version: '3.1'
 
-volumes:
-  db:
-    driver: local
-
 services:
   mysql:
     image: mysql:5.7
@@ -13,6 +9,8 @@ services:
       - 'mysqldb:/var/lib/mysql'
     ports:
       - '3306:3306'
+    networks: 
+      - dpm_network
     expose:
       - 3306
     environment:
@@ -30,69 +28,88 @@ services:
     volumes:
       - ./influxdb:/docker-entrypoint-initdb.d
       - 'influxdb:/var/lib/influxdb'
+    networks: 
+      - dpm_network
     environment:
       INFLUXDB_ADMIN_ENABLED: "true"
-
-  tmail:
-    image: vimagick/tmail
-    ports:
-      - "25:25"
-      - "110:110"
-    volumes:
-      - mail:/var/mail
-    environment:
-      - MAIL_NAME=domain.org
-      - MAIL_PATH=/var/mail
-      - MAIL_USER=user
-      - MAIL_PASS=pass
-    restart: always
   
   # Internal SDC
   sdc1:
-    image: 'streamsets/datacollector:latest'
+    image: streamsets/datacollector:3.7.1
     restart: always
+    hostname: sdc1
     volumes:
-      - 'dc1:/data'
+      - 'sdc1:/data'
+      - './sdcUserLibraries:/opt/streamsets-datacollector-user-libs'
+    networks: 
+      - dpm_network
     expose:
       - "18630"
+    ulimits:
+      nofile: 32768
   
   sdc2:
-    image: 'streamsets/datacollector:latest'
+    image: streamsets/datacollector:3.7.1
+    container_name: sdc.cluster
     restart: always
     volumes:
-      - 'dc2:/data'
-    expose:
-      - "18630"
+      - 'sdc2:/data'
+      - 'sdc2:/etc/sdc'
+      - './sdcUserLibraries:/opt/streamsets-datacollector-user-libs'
+    hostname: sdc.cluster
+    networks: 
+      - dpm_network
     ports:
-      - "18630:18630"
+      - '18630:18630' 
+    ulimits:
+      nofile: 32768
 
   sch:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./control_hub/Dockerfile
+      args:
+        - MAIL_ADD=$MAIL_ADD
+        - MAIL_PWD=$MAIL_PWD
+        - DPM_URL=$DPM_URL
+    container_name: dpm.cluster
     depends_on:
       - mysql
       - influxdb
-      - tmail
       - sdc1
-      - sdc2
-    links:
-      - mysql
-      - influxdb
-      - tmail
-      - sdc1
-      - sdc2
+    hostname: dpm.cluster
+    networks: 
+      - dpm_network
+    expose:
+      - "18631"
+      - "18632"
     ports:
-      - '18631:18631'
       - '18632:18632'
+      - '18631:18631'
+      - '587'
+      - '465'
     volumes:
-      - 'ch:/data'
-      - 'ch:/etc/dpm'
+      - 'dpm:/data'
+      - 'dpm:/etc/dpm'
+  
+  edge:
+    image: streamsets/datacollector-edge:3.7.1
+    container_name: edge.cluster
+    hostname: edge.cluster
+    networks: 
+      - dpm_network
+    ports:
+      - '18633:18633'
+    volumes:
+      - 'edge:/opt/datacollector-edge/data'
 
 volumes:
   mysqldb:
   influxdb:
-  dc1:
-  dc2:
-  ch:
-  mail:
+  sdc1:
+  sdc2:
+  dpm:
+  edge:
+
+networks:
+  dpm_network:
