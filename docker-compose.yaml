@@ -35,7 +35,7 @@ services:
   
   # Internal SDC
   sdc1:
-    image: streamsets/datacollector:3.7.1
+    image: streamsets/datacollector:3.8.0
     restart: always
     hostname: sdc1
     volumes:
@@ -49,7 +49,7 @@ services:
       nofile: 32768
   
   sdc2:
-    image: streamsets/datacollector:3.7.1
+    image: streamsets/datacollector:3.8.0
     container_name: sdc.cluster
     restart: always
     volumes:
@@ -93,7 +93,7 @@ services:
       - 'dpm:/etc/dpm'
   
   edge:
-    image: streamsets/datacollector-edge:3.7.1
+    image: streamsets/datacollector-edge:3.8.0
     container_name: edge.cluster
     hostname: edge.cluster
     networks: 
