@@ -41,6 +41,7 @@ services:
     volumes:
       - 'sdc1:/data'
       - './sdcUserLibraries:/opt/streamsets-datacollector-user-libs'
+      - './resources:/resources'
     networks: 
       - dpm_network
     expose:
@@ -53,14 +54,32 @@ services:
     container_name: sdc.cluster
     restart: always
     volumes:
-      - 'sdc2:/data'
+      - 'sdc2_data:/data'
       - 'sdc2:/etc/sdc'
       - './sdcUserLibraries:/opt/streamsets-datacollector-user-libs'
-    hostname: sdc.cluster
+      - './resources:/resources'
+    hostname: ${HOSTNAME}
     networks: 
       - dpm_network
     ports:
       - '18630:18630' 
+    ulimits:
+      nofile: 32768
+  
+  sdt:
+    image: streamsets/transformer:3.9.0-latest
+    container_name: sdt.cluster
+    restart: always
+    volumes:
+      - 'sdt:/etc/sdt'
+      - 'sdt_data:/data'
+      - './streamsets-transformer-user-libs:/opt/streamsets-transformer-user-libs'
+      - './resources:/resources'
+    hostname: ${HOSTNAME}
+    networks: 
+      - dpm_network
+    ports:
+      - '19630:19630' 
     ulimits:
       nofile: 32768
 
@@ -108,8 +127,11 @@ volumes:
   influxdb:
   sdc1:
   sdc2:
+  sdc2_data:
   dpm:
   edge:
+  sdt:
+  sdt_data:
 
 networks:
   dpm_network:
