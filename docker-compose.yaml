@@ -35,7 +35,7 @@ services:
   
   # Internal SDC
   sdc1:
-    image: streamsets/datacollector:3.8.0
+    image: "streamsets/datacollector:${SDC_VERSION:-3.8.0}"
     restart: always
     hostname: sdc1
     volumes:
@@ -50,7 +50,7 @@ services:
       nofile: 32768
   
   sdc2:
-    image: streamsets/datacollector:3.8.0
+    image: "streamsets/datacollector:${SDC_VERSION:-3.8.0}"
     container_name: sdc.cluster
     restart: always
     volumes:
@@ -67,7 +67,7 @@ services:
       nofile: 32768
   
   sdt:
-    image: streamsets/transformer:3.9.0-latest
+    image: streamsets/transformer:${SDT_VERSION:-3.9.0-latest}
     container_name: sdt.cluster
     restart: always
     volumes:
@@ -90,7 +90,8 @@ services:
       args:
         - MAIL_ADD=$MAIL_ADD
         - MAIL_PWD=$MAIL_PWD
-        - DPM_URL=$DPM_URL
+        - DPM_URL=${DPM_URL:?err}
+        - VERSION=${DPM_VERSION:-3.8.0}
     container_name: dpm.cluster
     depends_on:
       - mysql
@@ -112,7 +113,7 @@ services:
       - 'dpm:/etc/dpm'
   
   edge:
-    image: streamsets/datacollector-edge:3.8.0
+    image: streamsets/datacollector-edge:${SDCE_VERSION:-3.8.0}
     container_name: edge.cluster
     hostname: edge.cluster
     networks: 

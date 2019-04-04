@@ -1,8 +1,8 @@
 Control Hub on Docker
 =====================
 
-Current version:
-* Data Collector 3.7.1
+Current default version:
+* Data Collector 3.8.0
 * Control Hub 3.8.0
 
 ## Prerequisits
@@ -15,7 +15,6 @@ Make sure you run `docker login` and you have access to our private docker hub
 ```
 git clone https://github.com/streamsets/DPM_docker-compose.git
 cd DPM_docker-compose
-docker-compose build && docker-compose up -d
 ```
 
 Create a gmail application password here https://myaccount.google.com/apppasswords and save it
@@ -39,9 +38,12 @@ When the setup is complet thos different ports are available:
 * Control Hub: [localhost:18631](localhost:18631)
 * Data Collector: [localhost:18630](localhost:18630)
 * Edge: [localhost:18633](localhost:18633)
+* Transfomer: [localhost:19630](localhost:19630)
 
 To stop everithing run `docker-compose down`
 
-If you need to restart from scratch, make sure to run `docker volume prune` to reset any volume.
+If you need to restart from scratch, make sure to run `docker-compose down -v` to reset any volume.
 
 You can add user libraries directly in the local sdcUserLibraries and restart the data collectors
+
+You can add resources by droping them in the resources folder

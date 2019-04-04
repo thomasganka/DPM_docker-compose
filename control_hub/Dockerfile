@@ -1,10 +1,12 @@
-FROM streamsets/control-hub:3.8.0
+ARG VERSION
+
+FROM streamsets/control-hub:${VERSION}
 
 ARG MAIL_ADD
 ARG MAIL_PWD
 
-ENV DPM_VERSION=3.7.1
-ARG DPM_URL=localhost:18631
+ENV DPM_VERSION=${VERSION}
+ARG DPM_URL
 
 COPY ./control_hub/*.sh ./
 
