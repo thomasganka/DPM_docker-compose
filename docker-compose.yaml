@@ -93,6 +93,7 @@ services:
         - DPM_URL=${DPM_URL:?err}
         - VERSION=${DPM_VERSION:-3.8.0}
     container_name: dpm.cluster
+    restart: always
     depends_on:
       - mysql
       - influxdb
@@ -115,6 +116,7 @@ services:
   edge:
     image: streamsets/datacollector-edge:${SDCE_VERSION:-3.8.0}
     container_name: edge.cluster
+    restart: always
     hostname: edge.cluster
     networks: 
       - dpm_network
