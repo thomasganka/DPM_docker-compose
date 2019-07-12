@@ -35,7 +35,7 @@ services:
   
   # Internal SDC
   sdc1:
-    image: "streamsets/datacollector:${SDC_VERSION:-3.8.0}"
+    image: "streamsets/datacollector:${SDC_VERSION:-3.9.1}"
     restart: always
     hostname: sdc1
     volumes:
@@ -50,7 +50,7 @@ services:
       nofile: 32768
   
   sdc2:
-    image: "streamsets/datacollector:${SDC_VERSION:-3.8.0}"
+    image: "streamsets/datacollector:${SDC_VERSION:-3.9.1}"
     container_name: sdc.cluster
     restart: always
     volumes:
@@ -65,23 +65,6 @@ services:
       - '18630:18630' 
     ulimits:
       nofile: 32768
-  
-  sdt:
-    image: streamsets/transformer:${SDT_VERSION:-3.9.0-latest}
-    container_name: sdt.cluster
-    restart: always
-    volumes:
-      - 'sdt:/etc/sdt'
-      - 'sdt_data:/data'
-      - './streamsets-transformer-user-libs:/opt/streamsets-transformer-user-libs'
-      - './resources:/resources'
-    hostname: ${HOSTNAME}
-    networks: 
-      - dpm_network
-    ports:
-      - '19630:19630' 
-    ulimits:
-      nofile: 32768
 
   sch:
     build:
@@ -91,9 +74,10 @@ services:
         - MAIL_ADD=$MAIL_ADD
         - MAIL_PWD=$MAIL_PWD
         - DPM_URL=${DPM_URL:?err}
-        - VERSION=${DPM_VERSION:-3.8.0}
-    container_name: dpm.cluster
-    restart: always
+        - VERSION=${DPM_VERSION:-3.10.0}
+    # restart: always
+    environment:
+      - DPM_VERSION=${DPM_VERSION:-3.10.0}
     depends_on:
       - mysql
       - influxdb
@@ -114,7 +98,7 @@ services:
       - 'dpm:/etc/dpm'
   
   edge:
-    image: streamsets/datacollector-edge:${SDCE_VERSION:-3.8.0}
+    image: streamsets/datacollector-edge:${SDCE_VERSION:-3.9.1}
     container_name: edge.cluster
     restart: always
     hostname: edge.cluster
@@ -129,10 +113,10 @@ volumes:
   mysqldb:
   influxdb:
   sdc1:
-  sdc2:
-  sdc2_data:
+  # sdc2:
+  # sdc2_data:
   dpm:
-  edge:
+  # edge:
   sdt:
   sdt_data:
 

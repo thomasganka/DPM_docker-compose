@@ -28,7 +28,8 @@ if [ ! -e "$DPM_CONF/READY" ]; then
     echo $DPM_VERSION > $DPM_CONF/READY
 elif [ "$DPM_VERSION" != "$(cat $DPM_CONF/READY)" ] ;then
     echo "Update db Schemas"
-    dev/01-updatedb.sh
+    dev/01-initdb.sh
+    echo $DPM_VERSION > $DPM_CONF/READY
 fi 
 
 bin/streamsets dpmcli security systemId
