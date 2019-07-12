@@ -113,10 +113,10 @@ volumes:
   mysqldb:
   influxdb:
   sdc1:
-  # sdc2:
-  # sdc2_data:
+  sdc2:
+  sdc2_data:
   dpm:
-  # edge:
+  edge:
   sdt:
   sdt_data:
 
