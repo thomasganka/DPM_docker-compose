@@ -2,8 +2,8 @@ Control Hub on Docker
 =====================
 
 Current default version:
-* Data Collector 3.8.0
-* Control Hub 3.8.0
+* Data Collector 3.9.1
+* Control Hub 3.10.0
 
 ## Prerequisits
 
@@ -38,7 +38,6 @@ When the setup is complet thos different ports are available:
 * Control Hub: [localhost:18631](localhost:18631)
 * Data Collector: [localhost:18630](localhost:18630)
 * Edge: [localhost:18633](localhost:18633)
-* Transfomer: [localhost:19630](localhost:19630)
 
 To stop everithing run `docker-compose down`
 
