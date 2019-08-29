@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ./utils/docker_volume_backup.sh ./docker-compose.yaml sch $(pwd)/backup/$(date '+%d-%b-%Y_%H-%M-%S')
+ln -nsf $(pwd)/backup/$(date '+%d-%b-%Y_%H-%M-%S') $(pwd)/backup/latest
 
 docker-compose down
 
