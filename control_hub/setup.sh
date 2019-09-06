@@ -5,20 +5,20 @@ declare -a dbs=("jobrunner" "messaging" "notification" "pipelinestore" "policy" 
 # add JDBC for the MySQL databases
 for i in "${dbs[@]}"
 do
-    sed -i "s/^db.openjpa.ConnectionURL=/db.openjpa.ConnectionURL=jdbc\:mysql\:\/\/mysql:3306\/${i}?useSSL=false/" ${DPM_CONF}/${i}-app.properties
+    sed -i "s/^db.openjpa.ConnectionURL=/db.openjpa.ConnectionURL=jdbc\:mysql\:\/\/mysql.emea.cluster:3306\/${i}?useSSL=false/" ${DPM_CONF}/${i}-app.properties
     sed -i "s/^db.openjpa.ConnectionUserName=/db.openjpa.ConnectionUserName=admin/" ${DPM_CONF}/${i}-app.properties
     sed -i "s/^db.openjpa.ConnectionPassword=/db.openjpa.ConnectionPassword=admin/" ${DPM_CONF}/${i}-app.properties
 done
 
 # set dpm.base.instance.url in common-to-all-apps.properties
-sed -i "s/.*dpm.base.instance.url=.*/dpm.base.instance.url=http\:\/\/${DPM_URL}/" ${DPM_CONF}/common-to-all-apps.properties
+sed -i "s/.*dpm.base.instance.url=.*/dpm.base.instance.url=http\:\/\/sch01.emea.cluster:18631/" ${DPM_CONF}/common-to-all-apps.properties
 for i in "${dbs[@]}"
 do
     sed -i "s/.*dpm.app.${i}.url=.*/dpm.app.${i}.url=http\:\/\/localhost\:18631/" ${DPM_CONF}/common-to-all-apps.properties
 done
 
 # set dpm.base.url in common-to-all-apps.properties
-sed -i "s/^dpm.base.url=/dpm.base.url=http\:\/\/${DPM_URL}/" ${DPM_CONF}/common-to-all-apps.properties
+sed -i "s/^dpm.base.url=/dpm.base.url=http\:\/\/sch01.emea.cluster:18631/" ${DPM_CONF}/common-to-all-apps.properties
 
 # comment out http.load.balancer line in /etc/dpm/common-to-all-apps.properties
 sed -i 's/^http.load.balancer.url=/#http.load.balancer.url=/' ${DPM_CONF}/common-to-all-apps.properties
@@ -38,13 +38,13 @@ sed -i "s/^xmail.password=/xmail.password=${MAIL_PWD}/" ${DPM_CONF}/common-to-al
 sed -i "s/^xmail.from.address=/xmail.from.address=${MAIL_ADD}/" ${DPM_CONF}/common-to-all-apps.properties
 
 # set pipeline.designer.system.sdc.url in common-to-all-apps.properties
-sed -i 's/^pipeline.designer.system.sdc.url=.*/pipeline.designer.system.sdc.url=http\:\/\/sdc1\:18630/' ${DPM_CONF}/common-to-all-apps.properties
+sed -i 's/^pipeline.designer.system.sdc.url=.*/pipeline.designer.system.sdc.url=http\:\/\/sdc01.emea.cluster\:18630/' ${DPM_CONF}/common-to-all-apps.properties
 
 # set db.url in timeseries-app.properties
-sed -i 's/^db.url=/db.url=http\:\/\/influxdb\:8086/' ${DPM_CONF}/timeseries-app.properties
+sed -i 's/^db.url=/db.url=http\:\/\/influx.emea.cluster\:8086/' ${DPM_CONF}/timeseries-app.properties
 
 # set dpm.app.db.url in timeseries-app.properties
-sed -i 's/^dpm.app.db.url=/dpm.app.db.url=http\:\/\/influxdb\:8086/' ${DPM_CONF}/timeseries-app.properties
+sed -i 's/^dpm.app.db.url=/dpm.app.db.url=http\:\/\/influx.emea.cluster\:8086/' ${DPM_CONF}/timeseries-app.properties
 
 # set db.name in timeseries-app.properties
 sed -i 's/^db.name=/db.name=sch/' ${DPM_CONF}/timeseries-app.properties

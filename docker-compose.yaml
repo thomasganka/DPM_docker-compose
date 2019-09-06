@@ -7,12 +7,11 @@ services:
     volumes:
       - ./MySQL:/docker-entrypoint-initdb.d
       - 'mysqldb:/var/lib/mysql'
-    ports:
-      - '3306:3306'
-    networks: 
-      - dpm_network
-    expose:
-      - 3306
+    networks:
+      dpm_network:
+        aliases:
+          - mysql.emea.cluster
+    hostname: mysql.emea.cluster
     environment:
       MYSQL_ROOT_PASSWORD: local
     
@@ -20,16 +19,14 @@ services:
   influxdb:
     image: influxdb:latest
     restart: always
-    ports:
-      - '8086:8086'
-      - '8083:8083'
-    expose:
-      - 8086
     volumes:
       - ./influxdb:/docker-entrypoint-initdb.d
       - 'influxdb:/var/lib/influxdb'
-    networks: 
-      - dpm_network
+    networks:
+      dpm_network:
+        aliases:
+          - influx.emea.cluster
+    hostname: influx.emea.cluster
     environment:
       INFLUXDB_ADMIN_ENABLED: "true"
   
@@ -42,10 +39,11 @@ services:
       - 'sdc1:/data'
       - './sdcUserLibraries:/opt/streamsets-datacollector-user-libs'
       - './resources:/resources'
-    networks: 
-      - dpm_network
-    expose:
-      - "18630"
+    networks:
+      dpm_network:
+        aliases:
+          - sdc01.emea.cluster
+    hostname: sdc01.emea.cluster
     ulimits:
       nofile: 32768
   
@@ -58,9 +56,11 @@ services:
       - 'sdc2:/etc/sdc'
       - './sdcUserLibraries:/opt/streamsets-datacollector-user-libs'
       - './resources:/resources'
-    hostname: ${HOSTNAME}
-    networks: 
-      - dpm_network
+    networks:
+      dpm_network:
+        aliases:
+          - sdc02.emea.cluster
+    hostname: sdc02.emea.cluster
     ports:
       - '18630:18630' 
     ulimits:
@@ -82,13 +82,12 @@ services:
       - mysql
       - influxdb
       - sdc1
-    hostname: dpm.cluster
+    networks:
+       dpm_network:
+         aliases:
+          - sch01.emea.cluster
+    hostname: sch01.emea.cluster
     container_name: dpm.cluster
-    networks: 
-      - dpm_network
-    expose:
-      - "18631"
-      - "18632"
     ports:
       - '18632:18632'
       - '18631:18631'
@@ -101,9 +100,11 @@ services:
     image: streamsets/datacollector-edge:${SDCE_VERSION:-3.10.1}
     container_name: edge.cluster
     restart: always
-    hostname: edge.cluster
-    networks: 
-      - dpm_network
+    networks:
+      dpm_network:
+       aliases:
+         - sde01.emea.cluster
+    hostname: sde01.emea.cluster
     ports:
       - '18633:18633'
     volumes:
